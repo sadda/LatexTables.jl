@@ -3,6 +3,9 @@ uuid = "33562111-8cff-4957-beb7-4d2a52ae425e"
 authors = ["sadda <adam@utia.cas.cz> and contributors"]
 version = "0.1.0"
 
+[deps]
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
 [compat]
 julia = "1"
 
