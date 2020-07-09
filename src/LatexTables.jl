@@ -39,6 +39,8 @@ function table_to_tex(
         format_all = [format for i = 1:n_col]
     elseif size(format) == 1
         format_all = [format[1] for i = 1:n_col]
+    else
+        format_all = format;
     end
 
     #Beginning
