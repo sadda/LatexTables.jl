@@ -21,7 +21,6 @@ Cols(ind::Int) = Cols([ind])
 Cols(inds::Int...) = Cols([inds...])
 
 
-
 function setstyle!(c::Cell, args::LatexStyle...)
     for arg in args
         setstyle!(c.style, arg)

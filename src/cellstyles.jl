@@ -1,4 +1,4 @@
-ordered_keys = [:format, :prefix, :suffix, :size, :color]
+ordered_keys = [:format, :color]
 
 
 function apply(M::CellMatrix)
@@ -20,43 +20,51 @@ function apply(styles::Dict{Symbol, LatexStyle}, x)
 end
 
 # Color
-struct Color <: LatexStyle
+mutable struct Color <: LatexStyle
     val::Symbol
 end
 
 apply(s::Color, x) = string("\\color{", s.val,"}{", x, "}")
 
 
-# Text size
-struct Size <: LatexStyle
-    val::Symbol
-end
-
-apply(s::Size, x) = string("\\", s.val, "{", x, "}")
-
-
 # Rounding
-struct Format <: LatexStyle
-    val::NamedTuple
+mutable struct Format <: LatexStyle
+    type::Char
+    precision::Int
 end
 
-Format(; kwargs...) = Format(values(kwargs))
+Format(type::Char) = Format(type, 0)
+
+
+# TODO needs to be "2f" or similar
+Format(s::String) = Format(s[2], parse(Int, s[1]))
+
+
+string_dig(x, digits::Int) = format(x, precision=digits)
 
 apply(s::Format, x) = x
-apply(s::Format, x::Real) = format(x; s.val...)
 
+function apply(s::Format, x::Real)
 
-# Prefix
-struct Prefix <: LatexStyle
-    val::String
+    prec = s.precision
+    type = s.type
+    if type == 'f'
+        r = string_dig(x, prec)
+    elseif type == 'p'
+        r = string_dig(100*x, prec) * "\\%"
+    elseif type == 'd'
+        r = string_dig(x, 0)
+    elseif type == 'e'
+        if x == 0
+            r = "0"
+        else
+            order_of_mag = floor(log10(abs(x)))
+            value_print  = x*10^(-order_of_mag)
+            r = string_dig(value_print, prec) * "\\cdot 10^{" * string_dig(order_of_mag, 0) * "}"
+        end
+    else
+        error("Type not defined.")
+    end
+
+    return "\$" * r * "\$"
 end
-
-apply(s::Prefix, x) = string(s.val, " ", x)
-
-
-# Suffix
-struct Suffix <: LatexStyle
-    val::String
-end
-
-apply(s::Suffix, x) = string(x, " ", s.val)
