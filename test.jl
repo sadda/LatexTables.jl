@@ -14,5 +14,6 @@ print(table_to_tex(body;
     leading_col=["We", "all", "like", "swans"],
     header=["Header", "Header2", "Penguin", "Header4", "Swan"],
     #header=repeat(reshape(["Header", "Header2", "Penguin", "Header4", "Swan"], 1,:), 2),
-    alignment="l"
+    alignment="l",
+    #table_type=:tabular
     ));

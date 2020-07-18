@@ -69,7 +69,8 @@ end
 function create_table_mid!(rows, body_cells;
                            leading_col = [],
                            header = [],
-                           alignment = [])
+                           alignment = [],
+                           table_type = :booktabs)
 
     n_row, n_col = size(body_cells)
 
@@ -109,17 +110,33 @@ function create_table_mid!(rows, body_cells;
         throw(ArgumentError("Wrong header size"))
     end
 
-    push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
-    push!(rows, "\\toprule \n")
-    if !isempty(header_cells)
-        push!(rows, apply(header_cells))
-        push!(rows, "\\midrule \n")
+    if table_type == :booktabs
+        push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
+        push!(rows, "\\toprule \n")
+        if !isempty(header_cells)
+            push!(rows, apply(header_cells))
+            table_type == :booktabs && push!(rows, "\\midrule \n")
+        end
+        for i in 1:n_row
+            add_row = apply(body_cells[i,:])
+            isempty(leading_col) ? push!(rows, add_row) : push!(rows, string(leading_col[i]) * " & " * add_row)
+        end
+        push!(rows, "\\bottomrule \n")
+    elseif table_type == :tabular
+        push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
+        push!(rows, "\\hline \n")
+        if !isempty(header_cells)
+            push!(rows, apply(header_cells))
+            table_type == :booktabs && push!(rows, "\\hline \n")
+        end
+        for i in 1:n_row
+            add_row = apply(body_cells[i,:])
+            isempty(leading_col) ? push!(rows, add_row) : push!(rows, string(leading_col[i]) * " & " * add_row)
+        end
+        push!(rows, "\\hline \n")
+    else
+        throw(ArgumentError("Wrong table type"))
     end
-    for i in 1:n_row
-        add_row = apply(body_cells[i,:])
-        isempty(leading_col) ? push!(rows, add_row) : push!(rows, string(leading_col[i]) * " & " * add_row)
-    end
-    push!(rows, "\\bottomrule \n")
     push!(rows, "\\end{tabular} \n")
 end
 
@@ -135,7 +152,6 @@ function create_table_bot!(rows;
 end
 
 
-# TODO table_type
 # TODO add cell color, bold, italic
 function table_to_tex(body::AbstractMatrix;
                       col_format = [],
@@ -182,7 +198,7 @@ function table_to_tex(body::AbstractMatrix;
 
     rows = String[]
     whole_table && create_table_top!(rows; position=position, caption=caption, label=label, centering=centering, caption_top=caption_top)
-    create_table_mid!(rows, body_cells; leading_col=leading_col, header=header, alignment=alignment)
+    create_table_mid!(rows, body_cells; leading_col=leading_col, header=header, alignment=alignment, table_type=table_type)
     whole_table && create_table_bot!(rows; caption=caption, label=label, caption_top=caption_top)
 
     return reduce(string, rows)
