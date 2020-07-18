@@ -1,6 +1,11 @@
 ordered_keys = [:format, :color]
 
 
+function apply(row::CellArray)
+
+    string(join(apply.(row), " & "), " \\\\ \n")
+end
+
 function apply(M::CellMatrix)
     rows = map(enumerate(eachrow(M))) do (i, row)
         string(join(apply.(row), " & "), " \\\\ \n")

@@ -59,28 +59,54 @@ function create_table_top!(rows;
 end
 
 
+function find_first_lrc(s::String)
+
+    ii = findfirst.(['l', 'r', 'c'], s)
+    minimum(ii[isa.(ii, Number)])
+end
+
+
 function create_table_mid!(rows, body_cells;
-                           header=[],
-                           alignment=[])
+                           leading_col = [],
+                           header = [],
+                           alignment = [])
 
     n_row, n_col = size(body_cells)
 
-    if isempty(header)
-        header_cells = header
-    elseif isa(header, AbstractVector) && length(header) == n_col
-        header_cells = Cell.(reshape(header, 1, :))
-    elseif isa(header, AbstractMatrix) && size(header,2) == n_row
-        header_cells = Cell.(header)
+    if !isempty(leading_col)
+        length(leading_col) != n_row && throw(ArgumentError("Wrong leading column size"))
+        n_col_mod = n_col + 1
     else
-        throw(ArgumentError("wrong header"))
+        n_col_mod = n_col
     end
 
     if isempty(alignment)
-        align = fill("l", n_col)
-    elseif isa(header, AbstractVector) && length(alignment) == n_col
+        align = "l"^n_col_mod
+    elseif length(alignment) == 1 && isempty(leading_col)
+        align = alignment^n_col_mod
+    elseif length(alignment) == 1 && !isempty(leading_col)
+        align = "l" * alignment^(n_col_mod-1)
+    elseif length(alignment) == n_col && !isempty(leading_col)
+        ii    = find_first_lrc(alignment)
+        align = alignment[1:ii-1] * "l" * alignment[ii:end]
+    elseif length(alignment) == n_col_mod
         align = alignment
     else
-        throw(ArgumentError("wrong alignment"))
+        throw(ArgumentError("Wrong alignment size"))
+    end
+
+    if isempty(header)
+        header_cells = header
+    elseif isa(header, AbstractVector) && length(header) == n_col_mod
+        header_cells = Cell.(reshape(string.(header), 1, :))
+    elseif isa(header, AbstractVector) && length(header) == n_col && !isempty(leading_col)
+        header_cells = Cell.(hcat("", reshape(string.(header), 1, :)))
+    elseif isa(header, AbstractMatrix) && size(header,2) == n_col_mod
+        header_cells = Cell.(string.(header))
+    elseif isa(header, AbstractMatrix) && size(header,2) == n_col && !isempty(leading_col)
+        header_cells = Cell.(hcat(repeat([""],size(header,1),1), string.(header)))
+    else
+        throw(ArgumentError("Wrong header size"))
     end
 
     push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
@@ -89,7 +115,10 @@ function create_table_mid!(rows, body_cells;
         push!(rows, apply(header_cells))
         push!(rows, "\\midrule \n")
     end
-    push!(rows, apply(body_cells))
+    for i in 1:n_row
+        add_row = apply(body_cells[i,:])
+        isempty(leading_col) ? push!(rows, add_row) : push!(rows, string(leading_col[i]) * " & " * add_row)
+    end
     push!(rows, "\\bottomrule \n")
     push!(rows, "\\end{tabular} \n")
 end
@@ -106,9 +135,7 @@ function create_table_bot!(rows;
 end
 
 
-# TODO leading_col
 # TODO table_type
-# TODO check header, alignment
 # TODO add cell color, bold, italic
 function table_to_tex(body::AbstractMatrix;
                       col_format = [],
@@ -120,14 +147,14 @@ function table_to_tex(body::AbstractMatrix;
                       table_type = :booktabs,
                       leading_col = [],
                       header = [],
-                      caption_top = true
+                      caption_top = true,
                       position = "!ht",
                       caption = "",
                       label = "",
                       centering = true,
                       alignment = "",
                       whole_table = true,
-                      max_highlight_style = Color(:green)
+                      max_highlight_style = Color(:green),
                       min_highlight_style = Color(:blue)
                   )
 
@@ -155,7 +182,7 @@ function table_to_tex(body::AbstractMatrix;
 
     rows = String[]
     whole_table && create_table_top!(rows; position=position, caption=caption, label=label, centering=centering, caption_top=caption_top)
-    create_table_mid!(rows, body_cells)
+    create_table_mid!(rows, body_cells; leading_col=leading_col, header=header, alignment=alignment)
     whole_table && create_table_bot!(rows; caption=caption, label=label, caption_top=caption_top)
 
     return reduce(string, rows)
