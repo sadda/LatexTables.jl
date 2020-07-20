@@ -83,7 +83,7 @@ Format(type::Char) = Format(type, 0)
 
 
 # Needs to be "2f" or similar. Yeah, I know I should rewrite that.
-Format(s::String) = Format(s[2], parse(Int, s[1]))
+Format(s::String) = s == "d" ? Format('d', 0) : Format(s[2], parse(Int, s[1]))
 
 
 string_dig(x, digits::Int) = format(x, precision=digits)
