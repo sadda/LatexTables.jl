@@ -14,26 +14,11 @@ abstract type Indices end
     style::Dict{Symbol, LatexStyle} = Dict{Symbol, LatexStyle}()
 end
 
-
-function Cell(val::Real)
-    c = Cell(; val = val)
-    setstyle!(c, Format("3f"))
-    return c
-end
+Cell(val::Real) = Cell(; val = val, style = Dict(:format => Format("3f")))
+Cell(val::String) = Cell(; val = val, style = Dict(:format => Format('s')))
 
 
-function Cell(val::String)
-    c = Cell(; val = val)
-    setstyle!(c, Format('s'))
-    return c
-end
-
-
-function Base.show(io::IO, c::Cell)
-    col = get(c.style, :color, Color(:default))
-    fmt = get(c.style, :format, Format())
-    printstyled(io, format(c.val; fmt.val...); color = col.val)
-end
+Base.show(io::IO, c::Cell) = show(io, c.val)
 
 
 const CellMatrix = AbstractMatrix{<:Cell}
@@ -41,7 +26,7 @@ const CellArray = AbstractArray{<:Cell}
 
 
 include("cellstyles.jl")
-include("indices.jl")
+include("utilities.jl")
 
 
 function create_table_top!(rows;
