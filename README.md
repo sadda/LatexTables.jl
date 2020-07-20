@@ -66,4 +66,27 @@ The tables are written in default for `booktabs` (use `table_type=:tabular` if n
 \usepackage{booktabs}
 ```
 
+# Optional arguments
 
+Function `table_to_tex` supports a large number of optional arguments.
+
+| Argument | Comments |
+| ----- | ----- |
+| `col_format` | Column formatting. Accepts either `Array{String}` or `String`. The allowed values are </br> <ul><li>"s" for `string`</li><li>"d" for `integer`</li><li>"3f" for `float`</li><li>"1p" for percentage $24.1\%$</li><li>"2e" for exponential notation $1.31\cdot 10^{-3}$</li></ul> |
+| `row_format` | Row formatting. The same rules as for `col_format` |
+| `table_type` | Table type. Allowed values `:booktabs` and `:tabular`. The former requires `usepackage{booktabs}` in the LaTex preamble. |
+| `leading_col` | Names of the leading column. Accepts `Array{String}` or empty. |
+| `header` | Names of the header (possibly multiple lines). Accepts `Array{String}`, `Matrix{String}` or empty. |
+| `position` | Position of the floating environment such as `begin{table}[!ht]`. |
+| `caption` | Caption of the table. Accepts either `String` or empty. The latter will not print anything. |
+| `label` | Label of the table. Accepts either `String` or empty. The latter will not print anything. |
+| `centering` | `Bool` value whether `centering` will be added to the table |
+| `alignment` | Alignment of the columns. Accepts either `String`, `Char` or empty. The second option will propagate it for all columns. |
+| `floating_table` | `Bool` value whether `tabular` will be in the `table` floating environment. |
+| `caption_position_top` | `Bool` value whether the caption and label will be above the table. |
+| `highlight_max_row` | `Bool` value whether the maximum of each row will be highlighted. |
+| `highlight_min_row` | `Bool` value whether the minimum of each row will be highlighted. |
+| `highlight_max_col` | `Bool` value whether the maximum of each column will be highlighted. |
+| `highlight_min_col` | `Bool` value whether the minimum of each column will be highlighted. |
+| `highlight_max_style` | Highlighting style for the minimal value. It accepts `CellColor(:green!50)` for green cells with smaller opacity, `Color(:blue)` for blue text, `Style(:bold)` for bold or `Style(:italic)` or italic. These values (with possibly different color) can be combined in an array. |
+| `highlight_max_style` | Highlighting style for the minimal value. The same rules as `highlight_min_style`. |
