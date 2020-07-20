@@ -1,4 +1,4 @@
-ordered_keys = [:format, :color]
+ordered_keys = [:format, :style, :color, :cellcolor]
 
 
 function apply(row::CellArray)
@@ -32,6 +32,47 @@ end
 apply(s::Color, x) = string("\\color{", s.val,"}{", x, "}")
 
 
+# Style
+mutable struct Style <: LatexStyle
+    val::Symbol
+end
+
+function apply(s::Style, x)
+
+    if s.val == :bold
+        #s_out = string("\\boldmath{", x,"}")
+        i1 = findfirst('\$', x)
+        i2 = findlast('\$', x)
+        if !isnothing(i1) && !isnothing(i2)
+            s_out = x[1:i1] * "\\textbf{" * x[i1+1:i2-1] * "}" * x[i2:end]
+        else
+            s_out = "\\textbf{" *  x * "}"
+        end
+    elseif s.val == :italic
+        i1 = findfirst('\$', x)
+        i2 = findlast('\$', x)
+        if !isnothing(i1) && !isnothing(i2)
+            s_out = x[1:i1] * "\\textit{" * x[i1+1:i2-1] * "}" * x[i2:end]
+        else
+            s_out = "\\textit{" *  x * "}"
+        end
+    elseif s.val == :normal
+        s_out = s
+    else
+        error("Style now supported")
+    end
+    return s_out
+end
+
+
+# CellColor
+mutable struct CellColor <: LatexStyle
+    val::Symbol
+end
+
+apply(s::CellColor, x) = string("\\cellcolor{", s.val,"}", x)
+
+
 # Rounding
 mutable struct Format <: LatexStyle
     type::Char
@@ -41,7 +82,7 @@ end
 Format(type::Char) = Format(type, 0)
 
 
-# TODO needs to be "2f" or similar
+# Needs to be "2f" or similar. Yeah, I know I should rewrite that.
 Format(s::String) = Format(s[2], parse(Int, s[1]))
 
 

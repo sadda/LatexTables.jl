@@ -2,9 +2,8 @@ module LatexTables
 
 using Parameters, Formatting
 
-export Cell, setstyle!, Color, Size, Format, Prefix, Suffix,
+export Cell, setstyle!, Format, Style, Color, CellColor,
         apply, Table, Tabular, Cells, Rows, Cols, All, table_to_tex
-
 
 abstract type LatexStyle end
 abstract type Indices end
@@ -111,7 +110,7 @@ function create_table_mid!(rows, body_cells;
     end
 
     if table_type == :booktabs
-        push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
+        push!(rows, string("\\begin{tabular}{@{} ", align...," @{}} \n"))
         push!(rows, "\\toprule \n")
         if !isempty(header_cells)
             push!(rows, apply(header_cells))
@@ -152,7 +151,6 @@ function create_table_bot!(rows;
 end
 
 
-# TODO add cell color, bold, italic
 function table_to_tex(body::AbstractMatrix;
                       col_format = [],
                       row_format = [],
@@ -170,8 +168,8 @@ function table_to_tex(body::AbstractMatrix;
                       centering = true,
                       alignment = "",
                       whole_table = true,
-                      max_highlight_style = Color(:green),
-                      min_highlight_style = Color(:blue)
+                      max_highlight_style = [CellColor(:green!50), Color(:blue), Style(:bold)],
+                      min_highlight_style = Color(:orange)
                   )
 
     sum(max_col + max_row) > 1 && throw(ArgumentError("Both max_col and max_row are true"))
@@ -231,7 +229,13 @@ function add_rules_row_format!(rules, row_format, n_row)
 end
 
 
-function add_rules_max_col!(rules, body, highlight_style)
+add_rules_max_col!(rules, body, highlight_style::AbstractVector) = add_rules_max_col!.([rules], [body], highlight_style)
+add_rules_min_col!(rules, body, highlight_style::AbstractVector) = add_rules_min_col!.([rules], [body], highlight_style)
+add_rules_max_row!(rules, body, highlight_style::AbstractVector) = add_rules_max_row!.([rules], [body], highlight_style)
+add_rules_min_row!(rules, body, highlight_style::AbstractVector) = add_rules_min_row!.([rules], [body], highlight_style)
+
+
+function add_rules_max_col!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,2)
         x_ext = maximum(body[:,i])
@@ -243,7 +247,7 @@ function add_rules_max_col!(rules, body, highlight_style)
 end
 
 
-function add_rules_min_col!(rules, body, highlight_style)
+function add_rules_min_col!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,2)
         x_ext = minimum(body[:,i])
@@ -255,7 +259,7 @@ function add_rules_min_col!(rules, body, highlight_style)
 end
 
 
-function add_rules_max_row!(rules, body, highlight_style)
+function add_rules_max_row!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,1)
         x_ext = maximum(body[i,:])
@@ -267,7 +271,7 @@ function add_rules_max_row!(rules, body, highlight_style)
 end
 
 
-function add_rules_min_row!(rules, body, highlight_style)
+function add_rules_min_row!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,1)
         x_ext = minimum(body[i,:])
