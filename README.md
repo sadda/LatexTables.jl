@@ -2,6 +2,12 @@
 
 A simple utility to convert `Julia` tables into `LaTex`. While it supports formatting, highlighting maximal or minimal values, adding captions, labels, header, cell alignment and other options, it is very simple to use.
 
+## Installation
+Execute the following command in Julia Pkg REPL
+```julia
+(v1.5) pkg> add https://github.com/sadda/LatexTables.jl/
+```
+
 ## Simple example 1
 
 ```julia
