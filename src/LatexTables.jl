@@ -37,12 +37,12 @@ function create_table_top!(rows;
                caption::String = "",
                label::String = "",
                centering::Bool = true,
-               caption_top::Bool = true)
+               caption_position_top::Bool = true)
 
     push!(rows, string("\\begin{table}[", position,"] \n"))
     centering && push!(rows, "\\centering \n")
-    (caption_top && !isempty(caption)) && push!(rows, string("\\caption{", caption, "} \n"))
-    (caption_top && !isempty(label)) && push!(rows, string("\\label{", label, "} \n"))
+    (caption_position_top && !isempty(caption)) && push!(rows, string("\\caption{", caption, "} \n"))
+    (caption_position_top && !isempty(label)) && push!(rows, string("\\label{", label, "} \n"))
 end
 
 
@@ -131,10 +131,10 @@ end
 function create_table_bot!(rows;
                            caption::String = "",
                            label::String = "",
-                           caption_top::Bool = false)
+                           caption_position_top::Bool = false)
 
-    (!caption_top && !isempty(caption)) && push!(rows, string("\\caption{", caption, "} \n"))
-    (!caption_top && !isempty(label)) && push!(rows, string("\\label{", label, "} \n"))
+    (!caption_position_top && !isempty(caption)) && push!(rows, string("\\caption{", caption, "} \n"))
+    (!caption_position_top && !isempty(label)) && push!(rows, string("\\label{", label, "} \n"))
     push!(rows, "\\end{table} \n")
 end
 
@@ -142,26 +142,26 @@ end
 function table_to_tex(body::AbstractMatrix;
                       col_format = [],
                       row_format = [],
-                      max_row = false,
-                      min_row = false,
-                      max_col = false,
-                      min_col = false,
                       table_type = :booktabs,
                       leading_col = [],
                       header = [],
-                      caption_top = true,
                       position = "!ht",
                       caption = "",
                       label = "",
                       centering = true,
                       alignment = "",
-                      whole_table = true,
-                      max_highlight_style = [CellColor(:green!50), Color(:blue), Style(:bold)],
-                      min_highlight_style = Color(:orange)
+                      floating_table = true,
+                      caption_position_top = true,
+                      highlight_max_row = false,
+                      highlight_min_row = false,
+                      highlight_max_col = false,
+                      highlight_min_col = false,
+                      highlight_max_style = [CellColor(:green!50), Color(:blue), Style(:bold)],
+                      highlight_min_style = Color(:orange)
                   )
 
-    sum(max_col + max_row) > 1 && throw(ArgumentError("Both max_col and max_row are true"))
-    sum(min_col + min_row) > 1 && throw(ArgumentError("Both min_col and min_row are true"))
+    sum(highlight_max_col + highlight_max_row) > 1 && throw(ArgumentError("Both highlight_max_col and highlight_max_row are true"))
+    sum(highlight_min_col + highlight_min_row) > 1 && throw(ArgumentError("Both highlight_min_col and highlight_min_row are true"))
     sum(!isempty(col_format) + !isempty(row_format)) > 1 && throw(ArgumentError("Too many formats specified"))
 
     rules = []
@@ -171,10 +171,10 @@ function table_to_tex(body::AbstractMatrix;
     add_rules_col_format!(rules, col_format, n_col)
     add_rules_row_format!(rules, row_format, n_row)
 
-    max_col && add_rules_max_col!(rules, body, max_highlight_style)
-    min_col && add_rules_min_col!(rules, body, min_highlight_style)
-    max_row && add_rules_max_row!(rules, body, max_highlight_style)
-    min_row && add_rules_min_row!(rules, body, min_highlight_style)
+    highlight_max_col && add_rules_max_col!(rules, body, highlight_max_style)
+    highlight_min_col && add_rules_min_col!(rules, body, highlight_min_style)
+    highlight_max_row && add_rules_max_row!(rules, body, highlight_max_style)
+    highlight_min_row && add_rules_min_row!(rules, body, highlight_min_style)
 
     body_cells = Cell.(body)
 
@@ -183,9 +183,9 @@ function table_to_tex(body::AbstractMatrix;
     end
 
     rows = String[]
-    whole_table && create_table_top!(rows; position=position, caption=caption, label=label, centering=centering, caption_top=caption_top)
+    floating_table && create_table_top!(rows; position=position, caption=caption, label=label, centering=centering, caption_position_top=caption_position_top)
     create_table_mid!(rows, body_cells; leading_col=leading_col, header=header, alignment=alignment, table_type=table_type)
-    whole_table && create_table_bot!(rows; caption=caption, label=label, caption_top=caption_top)
+    floating_table && create_table_bot!(rows; caption=caption, label=label, caption_position_top=caption_position_top)
 
     return reduce(string, rows)
 end

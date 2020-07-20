@@ -46,7 +46,7 @@ setstyle!(M::CellMatrix, r::Rows, args::LatexStyle...) = @views setstyle!(M[r.in
 setstyle!(M::CellMatrix, r::Cols, args::LatexStyle...) = @views setstyle!(M[:, r.inds], args...)
 
 
-function make_tex_file(file_name::String, s::String; dir_name::String = pwd())
+function make_tex_file(file_name::String, s::String; compile=false, dir_name = pwd())
 
     full_name = joinpath(dir_name, file_name)
 
@@ -65,6 +65,7 @@ function make_tex_file(file_name::String, s::String; dir_name::String = pwd())
 
     close(f)
 
-    cmd = `pdflatex -quiet -output-directory $dir_name $full_name`;
-    run(cmd)
+    compile && run(`pdflatex -quiet -output-directory $dir_name $full_name`)
+
+    return nothing
 end
