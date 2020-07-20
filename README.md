@@ -5,8 +5,7 @@ A simple utility to convert `Julia` tables into `LaTex`. While it supports forma
 ## Installation
 Execute the following command in Julia
 ```julia
-(v1.5) julia> using Pkg
-(v1.5) julia> Pkg.add("https://github.com/sadda/LatexTables.jl/")
+Pkg.add("https://github.com/sadda/LatexTables.jl/")
 ```
 
 ## Simple example 1
