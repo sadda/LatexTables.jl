@@ -1,4 +1,4 @@
-function make_tex_file(dir_name::String, file_name::String, s::String)
+function make_tex_file(file_name::String, s::String; dir_name::String = pwd())
 
     full_name = joinpath(dir_name, file_name)
 
@@ -15,6 +15,8 @@ function make_tex_file(dir_name::String, file_name::String, s::String)
 
     close(f)
 
+
+    mkpath(dir_name)
     cmd = `pdflatex -quiet -output-directory $dir_name $full_name`;
     run(cmd)
 end
