@@ -9,13 +9,16 @@ abstract type LatexStyle end
 abstract type Indices end
 
 
-@with_kw_noshow mutable struct Cell{T}
+mutable struct Cell{T}
     val::T
-    style::Dict{Symbol, LatexStyle} = Dict{Symbol, LatexStyle}()
+    style::Dict{Symbol, LatexStyle}
+
+    Cell(val::T, style) where T = new{T}(val, convert(Dict{Symbol, LatexStyle}, style))
 end
 
-Cell(val::Real) = Cell(; val = val, style = Dict(:format => Format("3f")))
-Cell(val::String) = Cell(; val = val, style = Dict(:format => Format('s')))
+Cell(val) = Cell(val, Dict())
+Cell(val::Real) = Cell(val, Dict(:format => Format("3f")))
+Cell(val::String) = Cell(val, Dict(:format => Format('s')))
 
 
 Base.show(io::IO, c::Cell) = show(io, c.val)
