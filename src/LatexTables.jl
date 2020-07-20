@@ -226,10 +226,11 @@ add_rules_min_row!(rules, body, highlight_style::AbstractVector) = add_rules_min
 function add_rules_max_col!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,2)
-        x_ext = maximum(body[:,i])
-        i_ext = findall(body[:,i] .== x_ext)
+        i_red = findall(isa.(body[:,i], Number))
+        x_ext = maximum(body[i_red,i])
+        i_ext = findall(body[i_red,i] .== x_ext)
         for j in 1:length(i_ext)
-            push!(rules, Cells((i_ext[j],i)) => (highlight_style,))
+            push!(rules, Cells((i_red[i_ext[j]],i)) => (highlight_style,))
         end
     end
 end
@@ -238,10 +239,11 @@ end
 function add_rules_min_col!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,2)
-        x_ext = minimum(body[:,i])
-        i_ext = findall(body[:,i] .== x_ext)
+        i_red = findall(isa.(body[:,i], Number))
+        x_ext = minimum(body[i_red,i])
+        i_ext = findall(body[i_red,i] .== x_ext)
         for j in 1:length(i_ext)
-            push!(rules, Cells((i_ext[j],i)) => (highlight_style,))
+            push!(rules, Cells((i_red[i_ext[j]],i)) => (highlight_style,))
         end
     end
 end
@@ -250,10 +252,11 @@ end
 function add_rules_max_row!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,1)
-        x_ext = maximum(body[i,:])
-        i_ext = findall(body[i,:] .== x_ext)
+        i_red = findall(isa.(body[i,:], Number))
+        x_ext = maximum(body[i,i_red])
+        i_ext = findall(body[i,i_red] .== x_ext)
         for j in 1:length(i_ext)
-            push!(rules, Cells((i,i_ext[j])) => (highlight_style,))
+            push!(rules, Cells((i,i_red[i_ext[j]])) => (highlight_style,))
         end
     end
 end
@@ -262,10 +265,11 @@ end
 function add_rules_min_row!(rules, body, highlight_style::LatexStyle)
 
     for i in 1:size(body,1)
-        x_ext = minimum(body[i,:])
-        i_ext = findall(body[i,:] .== x_ext)
+        i_red = findall(isa.(body[i,:], Number))
+        x_ext = minimum(body[i,i_red])
+        i_ext = findall(body[i,i_red] .== x_ext)
         for j in 1:length(i_ext)
-            push!(rules, Cells((i,i_ext[j])) => (highlight_style,))
+            push!(rules, Cells((i,i_red[i_ext[j]])) => (highlight_style,))
         end
     end
 end

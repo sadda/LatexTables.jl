@@ -62,7 +62,6 @@ function apply(s::Style, x)
 end
 
 
-
 # CellColor
 mutable struct CellColor <: LatexStyle
     val::Symbol
@@ -71,18 +70,34 @@ end
 apply(s::CellColor, x) = string("\\cellcolor{", s.val,"}", x)
 
 
-# Rounding
+# Format
 mutable struct Format <: LatexStyle
     type::Char
     precision::Int
 end
 
-Format(type::Char) = Format(type, 0)
+Format(s::Char) = Format(string(s))
 
 
-# Needs to be "2f" or similar. Yeah, I know I should rewrite that.
-Format(s::String) = s == "d" ? Format('d', 0) : Format(s[2], parse(Int, s[1]))
+function Format(s::String)
 
+    s_len = length(s)
+    if s_len > 2
+        throw(ArgumentError("Format $s too long. It should be \"3f\""))
+    elseif s_len == 2
+        if !(s[2] in ['d', 'e', 'f', 'p', 's'])
+            throw(ArgumentError("Format $s has wrong second char. Use one of the following ['d', 'e', 'f', 'p', 's']"))
+        else
+            return Format(s[2], parse(Int, s[1]))
+        end
+    elseif s_len == 1
+        if !(s[1] in ['d', 's'])
+            throw(ArgumentError("Format $s has one char only. Use one of the following ['d', 's'] or use two chars for remaining."))
+        else
+            return Format(s[1], 0)
+        end
+    end
+end
 
 string_dig(x, digits::Int) = format(x, precision=digits)
 
@@ -106,6 +121,8 @@ function apply(s::Format, x::Real)
             value_print  = x*10^(-order_of_mag)
             r = string_dig(value_print, prec) * "\\cdot 10^{" * string_dig(order_of_mag, 0) * "}"
         end
+    elseif type == 's'
+        return string(x)
     else
         error("Type not defined.")
     end
