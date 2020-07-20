@@ -3,7 +3,7 @@ module LatexTables
 using Parameters, Formatting
 
 export Cell, setstyle!, Format, Style, Color, CellColor,
-        apply, Table, Tabular, Cells, Rows, Cols, All, table_to_tex
+        apply, Table, Tabular, Cells, Rows, Cols, All, table_to_tex, make_tex_file
 
 abstract type LatexStyle end
 abstract type Indices end

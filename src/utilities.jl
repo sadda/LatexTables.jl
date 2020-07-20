@@ -50,6 +50,8 @@ function make_tex_file(file_name::String, s::String; dir_name::String = pwd())
 
     full_name = joinpath(dir_name, file_name)
 
+    mkpath(dir_name)
+
     f = open(full_name, "w")
 
     write(f, "\\documentclass{article}\n\n")
@@ -63,8 +65,6 @@ function make_tex_file(file_name::String, s::String; dir_name::String = pwd())
 
     close(f)
 
-
-    mkpath(dir_name)
     cmd = `pdflatex -quiet -output-directory $dir_name $full_name`;
     run(cmd)
 end
