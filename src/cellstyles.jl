@@ -37,32 +37,30 @@ mutable struct Style <: LatexStyle
     val::Symbol
 end
 
-function apply(s::Style, x)
 
-    if s.val == :bold
-        #s_out = string("\\boldmath{", x,"}")
-        i1 = findfirst('\$', x)
-        i2 = findlast('\$', x)
-        if !isnothing(i1) && !isnothing(i2)
-            s_out = x[1:i1] * "\\textbf{" * x[i1+1:i2-1] * "}" * x[i2:end]
-        else
-            s_out = "\\textbf{" *  x * "}"
-        end
-    elseif s.val == :italic
-        i1 = findfirst('\$', x)
-        i2 = findlast('\$', x)
-        if !isnothing(i1) && !isnothing(i2)
-            s_out = x[1:i1] * "\\textit{" * x[i1+1:i2-1] * "}" * x[i2:end]
-        else
-            s_out = "\\textit{" *  x * "}"
-        end
-    elseif s.val == :normal
-        s_out = s
-    else
-        error("Style now supported")
+function apply(s::Style, x)
+    stl = s.val
+    if !(stl in [:normal, :bold, :italic])
+        throw(ArgumentError("Style $(stl) not supported. Use one of the following [:normal, :bold, :italic]"))
     end
-    return s_out
+
+    if stl == :normal
+        return x
+    elseif stl == :bold
+        l_style = "\\textbf"
+    else
+        l_style = "\\textit"
+    end
+
+    i1 = findfirst('\$', x)
+    i2 = findlast('\$', x)
+    if !isnothing(i1) && !isnothing(i2)
+        return x[1:i1] * l_style * "{" * x[i1+1:i2-1] * "}" * x[i2:end]
+    else
+        return l_style * "{" *  x * "}"
+    end
 end
+
 
 
 # CellColor
@@ -83,7 +81,7 @@ Format(type::Char) = Format(type, 0)
 
 
 # Needs to be "2f" or similar. Yeah, I know I should rewrite that.
-Format(s::String) = s == "d" ? Format('d', 0) : Format(s[2], parse(Int, s[1]))
+Format(s::String) = Format(s[2], parse(Int, s[1]))
 
 
 string_dig(x, digits::Int) = format(x, precision=digits)
