@@ -110,7 +110,7 @@ function create_table_mid!(rows, body_cells;
         end
         push!(rows, "\\bottomrule \n")
     elseif table_type == :tabular
-        push!(rows, string("\\begin{tabular}[@{} ", align...," @{}] \n"))
+        push!(rows, string("\\begin{tabular}{@{} ", align...," @{}} \n"))
         push!(rows, "\\hline \n")
         if !isempty(header_cells)
             push!(rows, apply(header_cells))
@@ -221,55 +221,37 @@ add_rules_max_col!(rules, body, highlight_style::AbstractVector) = add_rules_max
 add_rules_min_col!(rules, body, highlight_style::AbstractVector) = add_rules_min_col!.([rules], [body], highlight_style)
 add_rules_max_row!(rules, body, highlight_style::AbstractVector) = add_rules_max_row!.([rules], [body], highlight_style)
 add_rules_min_row!(rules, body, highlight_style::AbstractVector) = add_rules_min_row!.([rules], [body], highlight_style)
+add_rules_max_col!(rules, body, highlight_style::LatexStyle) = add_rules_minmax_col!(rules, body, highlight_style, true)
+add_rules_min_col!(rules, body, highlight_style::LatexStyle) = add_rules_minmax_col!(rules, body, highlight_style, false)
+add_rules_max_row!(rules, body, highlight_style::LatexStyle) = add_rules_minmax_row!(rules, body, highlight_style, true)
+add_rules_min_row!(rules, body, highlight_style::LatexStyle) = add_rules_minmax_row!(rules, body, highlight_style, false)
 
 
-function add_rules_max_col!(rules, body, highlight_style::LatexStyle)
-
-    for i in 1:size(body,2)
-        i_red = findall(isa.(body[:,i], Number))
-        x_ext = maximum(body[i_red,i])
-        i_ext = findall(body[i_red,i] .== x_ext)
-        for j in 1:length(i_ext)
-            push!(rules, Cells((i_red[i_ext[j]],i)) => (highlight_style,))
-        end
-    end
-end
-
-
-function add_rules_min_col!(rules, body, highlight_style::LatexStyle)
+function add_rules_minmax_col!(rules, body, highlight_style::LatexStyle, find_max::Bool)
 
     for i in 1:size(body,2)
         i_red = findall(isa.(body[:,i], Number))
-        x_ext = minimum(body[i_red,i])
-        i_ext = findall(body[i_red,i] .== x_ext)
-        for j in 1:length(i_ext)
-            push!(rules, Cells((i_red[i_ext[j]],i)) => (highlight_style,))
+        if !isempty(i_red)
+            x_ext = find_max ? maximum(body[i_red,i]) : minimum(body[i_red,i])
+            i_ext = findall(body[i_red,i] .== x_ext)
+            for j in 1:length(i_ext)
+                push!(rules, Cells((i_red[i_ext[j]],i)) => (highlight_style,))
+            end
         end
     end
 end
 
 
-function add_rules_max_row!(rules, body, highlight_style::LatexStyle)
+function add_rules_minmax_row!(rules, body, highlight_style::LatexStyle, find_max::Bool)
 
     for i in 1:size(body,1)
         i_red = findall(isa.(body[i,:], Number))
-        x_ext = maximum(body[i,i_red])
-        i_ext = findall(body[i,i_red] .== x_ext)
-        for j in 1:length(i_ext)
-            push!(rules, Cells((i,i_red[i_ext[j]])) => (highlight_style,))
-        end
-    end
-end
-
-
-function add_rules_min_row!(rules, body, highlight_style::LatexStyle)
-
-    for i in 1:size(body,1)
-        i_red = findall(isa.(body[i,:], Number))
-        x_ext = minimum(body[i,i_red])
-        i_ext = findall(body[i,i_red] .== x_ext)
-        for j in 1:length(i_ext)
-            push!(rules, Cells((i,i_red[i_ext[j]])) => (highlight_style,))
+        if !isempty(i_red)
+            x_ext = find_max ? maximum(body[i,i_red]) : minimum(body[i,i_red])
+            i_ext = findall(body[i,i_red] .== x_ext)
+            for j in 1:length(i_ext)
+                push!(rules, Cells((i,i_red[i_ext[j]])) => (highlight_style,))
+            end
         end
     end
 end
