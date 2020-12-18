@@ -157,7 +157,8 @@ function table_to_tex(body::AbstractMatrix;
                       highlight_max_col = false,
                       highlight_min_col = false,
                       highlight_max_style = [CellColor(:green!50), Color(:blue), Style(:bold)],
-                      highlight_min_style = Color(:orange)
+                      highlight_min_style = Color(:orange),
+                      other_rules = [],
                   )
 
     sum(highlight_max_col + highlight_max_row) > 1 && throw(ArgumentError("Both highlight_max_col and highlight_max_row are true"))
@@ -175,6 +176,8 @@ function table_to_tex(body::AbstractMatrix;
     highlight_min_col && add_rules_min_col!(rules, body, highlight_min_style)
     highlight_max_row && add_rules_max_row!(rules, body, highlight_max_style)
     highlight_min_row && add_rules_min_row!(rules, body, highlight_min_style)
+
+    [push!(rules, rule) for rule in other_rules]
 
     body_cells = Cell.(body)
 
